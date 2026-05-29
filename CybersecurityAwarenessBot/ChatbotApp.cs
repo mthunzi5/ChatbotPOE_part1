@@ -1,4 +1,5 @@
 using CybersecurityAwarenessBot.Services;
+using CybersecurityAwarenessBot.Models;
 
 namespace CybersecurityAwarenessBot;
 
@@ -6,7 +7,15 @@ public class ChatbotApp
 {
     private readonly AudioService _audioService = new();
     private readonly AsciiArtService _asciiArtService = new();
-    private readonly ResponseService _responseService = new();
+    private readonly TaskService _taskService = new();
+    private readonly ActivityLogger _activityLogger = new();
+    private readonly ResponseService _responseService;
+    private readonly UserContext _context = new();
+
+    public ChatbotApp()
+    {
+        _responseService = new ResponseService(_taskService, _activityLogger);
+    }
 
     public void Run()
     {
@@ -15,16 +24,16 @@ public class ChatbotApp
 
         _audioService.PlayGreeting();
 
-        var userName = PromptForName();
+        _context.UserName = PromptForName();
 
-        ConsoleStyler.WriteBotLine($"Welcome, {userName}! I am your Cybersecurity Awareness Assistant.");
+        ConsoleStyler.WriteBotLine($"Welcome, {_context.UserName}! I am your Cybersecurity Awareness Assistant.");
         ConsoleStyler.WriteBotLine("Ask me about phishing, passwords, and safe browsing.");
         ConsoleStyler.WriteBotLine("Type 'help' for examples, or 'exit' to quit.");
         ConsoleStyler.DrawDivider();
 
         while (true)
         {
-            ConsoleStyler.WritePrompt($"{userName}> ");
+            ConsoleStyler.WritePrompt($"{_context.UserName}> ");
             var input = Console.ReadLine();
 
             if (string.IsNullOrWhiteSpace(input))
@@ -35,11 +44,11 @@ public class ChatbotApp
 
             if (IsExitCommand(input))
             {
-                ConsoleStyler.WriteBotLine($"Goodbye, {userName}. Stay cyber safe.");
+                ConsoleStyler.WriteBotLine($"Goodbye, {_context.UserName}. Stay cyber safe.");
                 break;
             }
 
-            var response = _responseService.GetResponse(input, userName);
+            var response = _responseService.GetResponse(input, _context);
             ConsoleStyler.WriteBotLine(response);
         }
     }

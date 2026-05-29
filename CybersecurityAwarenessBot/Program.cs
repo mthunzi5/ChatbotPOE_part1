@@ -1,4 +1,5 @@
-﻿using CybersecurityAwarenessBot;
+﻿using CybersecurityAwarenessBot.Forms;
+using System.Windows.Forms;
 
-var app = new ChatbotApp();
-app.Run();
+ApplicationConfiguration.Initialize();
+Application.Run(new MainForm());
